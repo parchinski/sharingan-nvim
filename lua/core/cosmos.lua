@@ -331,7 +331,7 @@ local function setup_plugins()
     end
   end
 
-  require('lazy').setup(plugins)
+  require('lazy').setup({plugins}, {lockfile = vim.fn.stdpath('data') .. '/lazy-lock.json',})
 end
 
 local function setup()
