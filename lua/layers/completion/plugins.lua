@@ -69,62 +69,33 @@ cosmos.add_plugin('olimorris/codecompanion.nvim', {
 cosmos.add_plugin('yetone/avante.nvim', {
   opts = {
     provider = 'claude',
+    gemini = {
+      model = "gemini-2.0-flash",
+      api_key_name = "GEMINI_API_KEY",
+      temperature = 0,
+      max_tokens = 1000000,
+    },
     claude = {
-      api_key_name = "ANTHROPIC_API_KEY", -- the shell command must prefixed with `^cmd:(.*)`
+      model = "claude-3-7-sonnet-20250219",
+      api_key_name = "ANTHROPIC_API_KEY"
     },
     openai = {
-      model = 'gpt-4o',
+      model = 'o1-mini',
+      api_key_name = "OPENAI_API_KEY", -- the shell command must prefixed with `^cmd:(.*)`
     },
-    -- mappings = {
-    --     submit = {
-    --       normal = "<CR>",
-    --       insert = "<C-x>",
-    --     },
-    -- },
-    windows = {
-      wrap = true,
-      sidebar_header = {
-        align = 'center',
-        rounded = true,
-      },
-    },
-    -- vendors = {
-    --   ---@type AvanteProvider
-    --   perplexity = {
-    --     endpoint = 'https://api.perplexity.ai/chat/completions',
-    --     model = 'llama-3.1-sonar-large-128k-online',
-    --     api_key_name = 'PPLX_API_KEY',
-    --     --- this function below will be used to parse in cURL arguments.
-    --     parse_curl_args = function(opts, code_opts)
-    --       return {
-    --         url = opts.endpoint,
-    --         headers = {
-    --           ['Accept'] = 'application/json',
-    --           ['Content-Type'] = 'application/json',
-    --           ['Authorization'] = 'Bearer ' .. os.getenv(opts.api_key_name),
-    --         },
-    --         body = {
-    --           model = opts.model,
-    --           messages = require('avante.providers').openai.parse_message(code_opts), -- you can make your own message, but this is very advanced
-    --           temperature = 0,
-    --           max_tokens = 8192,
-    --           stream = true, -- this will be set by default.
-    --         },
-    --       }
-    --     end,
-        -- The below function is used if the vendors has specific SSE spec that is not claude or openai.
-        -- parse_response_data = function(data_stream, event_state, opts)
-        --   require('avante.providers').openai.parse_response(data_stream, event_state, opts)
-        -- end,
-    --   },
-  --  },
+    build = 'make',
+    lazy = false,
+    version = false,
+    event = "VeryLazy",
   },
-  build = 'make',
+
   dependencies = {
     'nvim-tree/nvim-web-devicons',
     'stevearc/dressing.nvim',
     'nvim-lua/plenary.nvim',
     'MunifTanjim/nui.nvim',
+    "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+    "zbirenbaum/copilot.lua", -- for providers='copilot'
     {
       'MeanderingProgrammer/render-markdown.nvim',
       opts = {
