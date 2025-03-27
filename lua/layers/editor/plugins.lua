@@ -295,3 +295,29 @@ cosmos.add_plugin('folke/lazydev.nvim', {
 cosmos.add_plugin('Bilal2453/luvit-meta', {
   lazy = true,
 })
+
+-- Python, Flask and Jinja development support
+cosmos.add_plugin('python-mode/python-mode', {
+  branch = 'develop',
+  ft = { 'python' },
+  config = function()
+    vim.g.pymode_python = 'python3'
+    vim.g.pymode_trim_whitespaces = 1
+    vim.g.pymode_lint = 1
+    vim.g.pymode_lint_on_write = 1
+    vim.g.pymode_rope = 0  -- Disable rope for better performance
+    vim.g.pymode_doc = 1
+  end,
+})
+
+cosmos.add_plugin('Glench/Vim-Jinja2-Syntax', {
+  ft = { 'jinja', 'html', 'html.jinja', 'htmljinja' },
+})
+
+cosmos.add_plugin('lepture/vim-jinja', {
+  ft = { 'jinja', 'html', 'html.jinja', 'htmljinja' },
+})
+
+cosmos.add_plugin('raimon49/requirements.txt.vim', {
+  ft = { 'requirements' },
+})
