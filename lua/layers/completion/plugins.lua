@@ -68,15 +68,15 @@ cosmos.add_plugin('olimorris/codecompanion.nvim', {
 
 cosmos.add_plugin('yetone/avante.nvim', {
   opts = {
-    provider = 'claude',
+    provider = 'gemini',
     gemini = {
       model = "gemini-2.5-pro-exp-03-25",
       api_key_name = "GEMINI_API_KEY",
       temperature = 0,
-      max_tokens = 1000000,
+      max_tokens = 1048576,
     },
     claude = {
-      model = "claude-3-5-sonnet-20241022",
+      model = "claude-3-7-sonnet-latest",
       api_key_name = "ANTHROPIC_API_KEY"
     },
     openai = {
