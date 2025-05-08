@@ -70,7 +70,13 @@ cosmos.add_plugin('yetone/avante.nvim', {
   opts = {
     provider = 'gemini',
     gemini = {
-      model = "gemini-2.5-pro-exp-03-25",
+      model = "gemini-2.5-pro-preview-05-06",
+      api_key_name = "GEMINI_API_KEY",
+      temperature = 0,
+      max_tokens = 1048576,
+    },
+    gemini_flash = {
+      model = "gemini-2.5-flash-preview-04-17",
       api_key_name = "GEMINI_API_KEY",
       temperature = 0,
       max_tokens = 1048576,
