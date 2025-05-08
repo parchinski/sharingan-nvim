@@ -26,13 +26,72 @@ function configs.mason()
     },
   })
 
+  -- Helper function for conditional loading of null-ls sources for Python
+  local function has_python_project_files_condition(utils)
+    local util_for_null_ls_cond = require('lspconfig.util') -- Local require for encapsulation
+    local root_dir = utils.root_dir -- Prefer root_dir from null-ls params if available
+
+    -- Fallback if null-ls couldn't determine root_dir in this context
+    if not root_dir then
+      local fname = utils.bufname
+      if not fname or fname == '' then
+        return false -- Cannot determine context for unnamed/empty buffer
+      end
+      -- Use a common root pattern for Python projects
+      root_dir = util_for_null_ls_cond.root_pattern('pyproject.toml', 'requirements.txt', '.git')(fname)
+    end
+
+    if root_dir then
+      local pyproject_path = root_dir .. '/pyproject.toml'
+      local requirements_path = root_dir .. '/requirements.txt'
+
+      -- Check if either file exists and is a file
+      local pyproject_stat = vim.loop.fs_stat(pyproject_path)
+      local requirements_stat = vim.loop.fs_stat(requirements_path)
+
+      if (pyproject_stat and pyproject_stat.type == 'file') or (requirements_stat and requirements_stat.type == 'file') then
+        return true
+      end
+    end
+    return false
+  end
   require('mason-null-ls').setup({
+    -- If you want Mason to ensure these tools are installed, add them here, e.g.:
+    -- ensure_installed = { "pylint", "black", "isort" },
     ensure_installed = nil,
     automatic_installation = false,
-    automatic_setup = true,
+    automatic_setup = true, -- mason-null-ls will call null_ls.setup()
+    handlers = {
+      black = function()
+        require('null-ls').register(
+          require('null-ls').builtins.formatting.black.with({
+            condition = has_python_project_files_condition,
+            filetypes = { 'python' }, -- Apply only to python files
+          })
+        )
+      end,
+      isort = function()
+        require('null-ls').register(
+          require('null-ls').builtins.formatting.isort.with({
+            extra_args = { '--profile', 'black' },
+            condition = has_python_project_files_condition,
+            filetypes = { 'python' },
+          })
+        )
+      end,
+      pylint = function()
+        require('null-ls').register(
+          require('null-ls').builtins.diagnostics.pylint.with({
+            condition = has_python_project_files_condition,
+            filetypes = { 'python' },
+          })
+        )
+      end,
+    },
   })
-  require('null-ls').setup()
-  -- require('mason-null-ls').setup_handlers()
+  -- The explicit require('null-ls').setup() is removed as mason-null-ls 
+  -- with automatic_setup=true handles calling null_ls.setup().
+  -- require('mason-null-ls').setup_handlers() -- This remains commented out as per original
 
   require('mason-lspconfig').setup()
   -- require('neodev').setup({
@@ -171,7 +230,7 @@ function configs.mason()
   local util = require('lspconfig.util')
 
   local servers = {
-    tsserver = {
+    ts_ls = {
       root_dir = lspconfig.util.root_pattern('tsconfig.json', 'package.json', '.git'),
     },
     biome = {
@@ -204,50 +263,57 @@ function configs.mason()
   -- Package installation folder
   local install_root_dir = vim.fn.stdpath('data') .. '/mason'
 
-  require('mason-lspconfig').setup_handlers({
-    -- The first entry (without a key) will be the default handler
-    -- and will be called for each installed server that doesn't have
-    -- a dedicated handler.
-    function(server_name) -- default handler (optional)
-      local opt = servers[server_name] or {}
-      opt = vim.tbl_deep_extend('force', {}, default_opt, opt)
-      lspconfig[server_name].setup(opt)
-    end,
-    -- The following handlers will be called for the specified servers
-    -- and will override the default handler for those servers.
-    -- If a handler is not specified for a server, the default handler
-    -- will be used.
-    ['rust_analyzer'] = function()
-      local opt = servers['rust_analyzer'] or {}
-      opt = vim.tbl_deep_extend('force', {}, default_opt, opt)
+  -- New setup for LSP servers managed by mason-lspconfig and lspconfig
+  local ensure_installed_servers = {}
+  for server_name_iterator, _ in pairs(servers) do -- servers here are tsserver, biome, lua_ls
+    table.insert(ensure_installed_servers, server_name_iterator)
+  end
+  -- If rust_analyzer is installed via Mason and you want mason-lspconfig to ensure it's installed:
+  table.insert(ensure_installed_servers, 'rust_analyzer') -- Add rust_analyzer here
 
-      -- DAP settings - https://github.com/simrat39/rust-tools.nvim#a-better-debugging-experience
-      local extension_path = install_root_dir .. '/packages/codelldb/extension/'
-      local codelldb_path = extension_path .. 'adapter/codelldb'
-      local liblldb_path = extension_path .. 'lldb/lib/liblldb.so'
-      local ih = require('inlay-hints')
-      require('rust-tools').setup({
-        tools = {
-          hover_actions = { border = 'solid' },
-          on_initialized = function()
-            vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter', 'CursorHold', 'InsertLeave' }, {
-              pattern = { '*.rs' },
-              callback = function()
-                vim.lsp.codelens.refresh()
-              end,
-            })
-            ih.set_all()
+  require('mason-lspconfig').setup({
+    ensure_installed = ensure_installed_servers,
+  })
+
+  -- Setup for servers defined in the `servers` table (e.g., tsserver, biome, lua_ls)
+  for server_name_iterator, server_opts in pairs(servers) do
+    local opts_loop = vim.tbl_deep_extend('force', {}, default_opt, server_opts or {})
+    lspconfig[server_name_iterator].setup(opts_loop)
+  end
+
+  -- Special setup for rust_analyzer using rust-tools
+  -- The `ensure_installed` above will ask Mason to install rust_analyzer if not present.
+  -- rust-tools will then configure it.
+  local rust_analyzer_lsp_opts = vim.tbl_deep_extend('force', {}, default_opt, servers['rust_analyzer'] or {})
+  -- Note: servers['rust_analyzer'] will be nil if not added to the `servers` table.
+  -- If you have specific rust_analyzer LSP settings (like custom root_dir, etc.),
+  -- you could add an entry for `rust_analyzer = { ... }` in the `servers` table.
+  -- For now, it will just use default_opt if not in `servers`.
+
+  local extension_path = install_root_dir .. '/packages/codelldb/extension/'
+  local codelldb_path = extension_path .. 'adapter/codelldb'
+  local liblldb_path = extension_path .. 'lldb/lib/liblldb.so'
+  local ih = require('inlay-hints') -- Ensure 'ih' is defined before rust-tools.setup
+  require('rust-tools').setup({
+    tools = {
+      hover_actions = { border = 'solid' },
+      on_initialized = function()
+        vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter', 'CursorHold', 'InsertLeave' }, {
+          pattern = { '*.rs' },
+          callback = function()
+            vim.lsp.codelens.refresh()
           end,
-          inlay_hints = {
-            auto = false,
-          },
-        },
-        server = opt,
-        dap = {
-          adapter = require('rust-tools.dap').get_codelldb_adapter(codelldb_path, liblldb_path),
-        },
-      })
-    end,
+        })
+        ih.set_all() -- ih is used here
+      end,
+      inlay_hints = {
+        auto = false,
+      },
+    },
+    server = rust_analyzer_lsp_opts, -- Pass the merged LSP options
+    dap = {
+      adapter = require('rust-tools.dap').get_codelldb_adapter(codelldb_path, liblldb_path),
+    },
   })
 end
 

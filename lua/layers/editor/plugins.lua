@@ -300,7 +300,3 @@ cosmos.add_plugin('Bilal2453/luvit-meta', {
 cosmos.add_plugin('lepture/vim-jinja', {
   ft = { 'jinja', 'html', 'html.jinja', 'htmljinja' },
 })
-
-cosmos.add_plugin('raimon49/requirements.txt.vim', {
-  ft = { 'requirements' },
-})
