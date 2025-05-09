@@ -23,7 +23,7 @@ end
 ---Make a HTTP request to https://zenquotes.io to get a random quote
 ---@return string
 M.get_quote = function()
-  return 'there is always more to create'
+  return 'xXx there is always more to create xXx'
   -- local found_curl, curl = pcall(require, 'plenary.curl')
   -- if not found_curl then
   --   error('plenary not found')

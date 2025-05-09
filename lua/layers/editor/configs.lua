@@ -49,7 +49,9 @@ function configs.mason()
       local pyproject_stat = vim.loop.fs_stat(pyproject_path)
       local requirements_stat = vim.loop.fs_stat(requirements_path)
 
-      if (pyproject_stat and pyproject_stat.type == 'file') or (requirements_stat and requirements_stat.type == 'file') then
+      if
+        (pyproject_stat and pyproject_stat.type == 'file') or (requirements_stat and requirements_stat.type == 'file')
+      then
         return true
       end
     end
@@ -63,33 +65,27 @@ function configs.mason()
     automatic_setup = true, -- mason-null-ls will call null_ls.setup()
     handlers = {
       black = function()
-        require('null-ls').register(
-          require('null-ls').builtins.formatting.black.with({
-            condition = has_python_project_files_condition,
-            filetypes = { 'python' }, -- Apply only to python files
-          })
-        )
+        require('null-ls').register(require('null-ls').builtins.formatting.black.with({
+          condition = has_python_project_files_condition,
+          filetypes = { 'python' }, -- Apply only to python files
+        }))
       end,
       isort = function()
-        require('null-ls').register(
-          require('null-ls').builtins.formatting.isort.with({
-            extra_args = { '--profile', 'black' },
-            condition = has_python_project_files_condition,
-            filetypes = { 'python' },
-          })
-        )
+        require('null-ls').register(require('null-ls').builtins.formatting.isort.with({
+          extra_args = { '--profile', 'black' },
+          condition = has_python_project_files_condition,
+          filetypes = { 'python' },
+        }))
       end,
       pylint = function()
-        require('null-ls').register(
-          require('null-ls').builtins.diagnostics.pylint.with({
-            condition = has_python_project_files_condition,
-            filetypes = { 'python' },
-          })
-        )
+        require('null-ls').register(require('null-ls').builtins.diagnostics.pylint.with({
+          condition = has_python_project_files_condition,
+          filetypes = { 'python' },
+        }))
       end,
     },
   })
-  -- The explicit require('null-ls').setup() is removed as mason-null-ls 
+  -- The explicit require('null-ls').setup() is removed as mason-null-ls
   -- with automatic_setup=true handles calling null_ls.setup().
   -- require('mason-null-ls').setup_handlers() -- This remains commented out as per original
 
@@ -138,50 +134,53 @@ function configs.mason()
       javascript = {
         function()
           return {
-            exe = "npx biome",
-            args = {"format", "--stdin-file-path", vim.api.nvim_buf_get_name(0)},
-            stdin = true
+            exe = 'npx biome',
+            args = { 'format', '--stdin-file-path', vim.api.nvim_buf_get_name(0) },
+            stdin = true,
           }
-        end
+        end,
       },
       typescript = {
         function()
           return {
-            exe = "npx biome",
-            args = {"format", "--stdin-file-path", vim.api.nvim_buf_get_name(0)},
-            stdin = true
+            exe = 'npx biome',
+            args = { 'format', '--stdin-file-path', vim.api.nvim_buf_get_name(0) },
+            stdin = true,
           }
-        end
+        end,
       },
       javascriptreact = {
         function()
           return {
-            exe = "npx biome",
-            args = {"format", "--stdin-file-path", vim.api.nvim_buf_get_name(0)},
-            stdin = true
+            exe = 'npx biome',
+            args = { 'format', '--stdin-file-path', vim.api.nvim_buf_get_name(0) },
+            stdin = true,
           }
-        end
+        end,
       },
       typescriptreact = {
         function()
           return {
-            exe = "npx biome",
-            args = {"format", "--stdin-file-path", vim.api.nvim_buf_get_name(0)},
-            stdin = true
+            exe = 'npx biome',
+            args = { 'format', '--stdin-file-path', vim.api.nvim_buf_get_name(0) },
+            stdin = true,
           }
-        end
+        end,
       },
       -- Add other filetypes as needed
-    }
+    },
   })
 
   -- Format on save
-  vim.api.nvim_exec([[
+  vim.api.nvim_exec(
+    [[
   augroup FormatAutogroup
     autocmd!
     autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx FormatWrite
   augroup END
-  ]], true)
+  ]],
+    true
+  )
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
