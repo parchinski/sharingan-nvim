@@ -5,35 +5,24 @@ local layers_dir = lua_dir .. '/layers'
 local private_layers_dir = lua_dir .. '/private/layers'
 local current_layer_name = nil
 
----@diagnostic disable-next-line: unused-function, unused-local
-local function list_all_layer_module_names(filename)
-  local list = {}
-  for _, dir in ipairs({ layers_dir, private_layers_dir }) do
-    local tmp = vim.split(vim.fn.globpath(dir, '*/' .. filename), '\n')
-    for _, f in ipairs(tmp) do
-      local m = f:sub(#lua_dir + 1, -1)
-      list[#list + 1] = m:sub(0, #m - 4)
-    end
-  end
-  return list
-end
-
 local function fill_layer_options()
   local user_config = utils.get_user_config()
   for _, layer in ipairs(user_config.layers) do
     for _, dir in ipairs({ layers_dir, private_layers_dir }) do
       ---@diagnostic disable-next-line: undefined-field
       local f = dir .. '/' .. layer.name .. '/options.lua'
-      if not utils.file_exists(f) then
-        goto continue
+      if utils.file_exists(f) then
+        local m = f:sub(#lua_dir + 1, -1)
+        local module_name = m:sub(2, #m - 4)
+        module_name = module_name:gsub('/', '.')
+        local options_ok, options_module = pcall(require, module_name)
+        if options_ok then
+          ---@diagnostic disable-next-line: undefined-field
+          utils.fill_options(options_module, layer.options)
+        else
+          print(string.format("Error loading options from %s: %s", module_name, options_module))
+        end
       end
-      local m = f:sub(#lua_dir + 1, -1)
-      local module_name = m:sub(2, #m - 4)
-      module_name = module_name:gsub('/', '.')
-      local options = require(module_name)
-      ---@diagnostic disable-next-line: undefined-field
-      utils.fill_options(options, layer.options)
-      ::continue::
     end
   end
 end
@@ -44,11 +33,12 @@ local function execute_layer_settings()
     for _, dir in ipairs({ layers_dir, private_layers_dir }) do
       ---@diagnostic disable-next-line: undefined-field
       local f = dir .. '/' .. layer.name .. '/settings.lua'
-      if not utils.file_exists(f) then
-        goto continue
+      if utils.file_exists(f) then
+        local ok, err = pcall(dofile, f)
+        if not ok then
+          print(string.format("Error executing settings file %s: %s", f, err))
+        end
       end
-      dofile(f)
-      ::continue::
     end
   end
 end
@@ -60,16 +50,14 @@ local function list_layer_module_names(filename)
     for _, dir in ipairs({ layers_dir, private_layers_dir }) do
       ---@diagnostic disable-next-line: undefined-field
       local f = dir .. '/' .. layer.name .. '/' .. filename
-      if not utils.file_exists(f) then
-        goto continue
+      if utils.file_exists(f) then
+        local m = f:sub(#lua_dir + 1, -1)
+        list[#list + 1] = {
+          ---@diagnostic disable-next-line: undefined-field
+          layer_name = layer.name,
+          module_name = m:sub(2, #m - 4):gsub('/', '.'),
+        }
       end
-      local m = f:sub(#lua_dir + 1, -1)
-      list[#list + 1] = {
-        ---@diagnostic disable-next-line: undefined-field
-        layer_name = layer.name,
-        module_name = m:sub(2, #m - 4):gsub('/', '.'),
-      }
-      ::continue::
     end
   end
   return list
@@ -107,7 +95,10 @@ end
 local function load_layer_keymappings()
   for _, m in ipairs(list_layer_module_names('keymappings.lua')) do
     current_layer_name = m.layer_name
-    require(m.module_name)
+    local ok, err = pcall(require, m.module_name)
+    if not ok then
+      print(string.format("Error loading keymappings from %s for layer %s: %s", m.module_name, m.layer_name, err))
+    end
     current_layer_name = nil
   end
 end
@@ -115,7 +106,10 @@ end
 local function load_layer_plugins()
   for _, m in ipairs(list_layer_module_names('plugins.lua')) do
     current_layer_name = m.layer_name
-    require(m.module_name)
+    local ok, err = pcall(require, m.module_name)
+    if not ok then
+      print(string.format("Error loading plugins from %s for layer %s: %s", m.module_name, m.layer_name, err))
+    end
     current_layer_name = nil
   end
 end
@@ -321,7 +315,10 @@ local function setup_plugins()
       if snapshot ~= nil then
         local plugin_name = opts[1]
         for plugin_name_, plugin_commit in pairs(snapshot) do
-          -- if plugin_name endswith plugin_name_
+          -- Current logic checks if the plugin_name from the setup (e.g., 'folke/lazy.nvim')
+          -- ends with the plugin_name_ from the snapshot (e.g., 'lazy.nvim').
+          -- For improved robustness, it's recommended that keys in 'cosmos.json' (snapshot)
+          -- directly match the full plugin identifiers used in the plugin setup (e.g., 'folke/lazy.nvim').
           if plugin_name:sub(-#plugin_name_) == plugin_name_ then
             opts.commit = plugin_commit['commit']
             break

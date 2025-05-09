@@ -43,15 +43,30 @@ function M.t(str)
   return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
 
+-- Processes the layer definitions from the user config.
+-- Layers can be defined in multiple ways:
+-- 1. As a simple string: "layer_name"
+--    This will be normalized to: { name = "layer_name", options = {} }
+-- 2. As a table with name as first element: { "layer_name", opt1 = val1, opt2 = val2 }
+--    This will be normalized to: { name = "layer_name", options = { opt1 = val1, opt2 = val2 } }
+-- 3. As a table with explicit name and options: { name = "layer_name", options = { opt1 = val1 } }
+--    This will be used as is.
+-- 4. As a table with explicit name and inline options: { name = "layer_name", opt1 = val1 }
+--    This will be normalized to: { name = "layer_name", options = { opt1 = val1 } }
 local function get_layers(layers)
   local res = {}
   for _, layer in ipairs(layers) do
     if type(layer) == 'string' then
       layer = { name = layer, options = {} }
     elseif type(layer) == 'table' then
-      local name = table.remove(layer, 1) or layer.name
-      if layer.options == nil then
-        layer = { name = name, options = layer }
+      -- Preserve the original table if it already has a name and options structure
+      if not (layer.name and layer.options) then
+        local name = table.remove(layer, 1) or layer.name
+        if layer.options == nil then -- Handles cases 2 and 4
+          layer = { name = name, options = layer }
+        else -- Handles case where name was removed but options field existed
+          layer = { name = name, options = layer.options }
+        end
       end
     end
     res[#res + 1] = layer
@@ -67,19 +82,51 @@ function M.get_user_config()
   end
   local options = require('core.options')
   local ok, __user_config = pcall(dofile, options.user_config_path)
+
   if not ok then
-    if not string.find(__user_config, 'No such file or directory') then
-      print('WARNING: user config file is invalid')
-      print(__user_config)
+    if string.find(tostring(__user_config), 'No such file or directory') then
+      print('User config not found, creating from sample...')
+      local sample_path = options.cosmos_configs_root .. '/.cosmos-nvim.sample.lua'
+      local sample_config_file = io.open(sample_path, 'r')
+
+      if sample_config_file then
+        local sample_config_content = sample_config_file:read('*a')
+        sample_config_file:close()
+
+        local user_config_file = io.open(options.user_config_path, 'w')
+        if user_config_file then
+          user_config_file:write(sample_config_content)
+          user_config_file:close()
+          -- Attempt to load the newly created config
+          local load_ok, loaded_config = pcall(dofile, options.user_config_path)
+          if load_ok then
+            __user_config = loaded_config
+          else
+            print(string.format("Error loading newly created sample config at %s: %s", options.user_config_path, loaded_config))
+            __user_config = {} -- Fallback to an empty table
+          end
+        else
+          print(string.format("Error: Could not open user config file for writing at %s", options.user_config_path))
+          __user_config = {} -- Fallback to an empty table
+        end
+      else
+        print(string.format("Error: Could not open sample config file at %s", sample_path))
+        __user_config = {} -- Fallback to an empty table
+      end
+    else
+      -- User config file exists but has errors, or another error occurred during dofile
+      print('WARNING: User config file is invalid or unreadable:')
+      print(tostring(__user_config)) -- Print the actual error message
+      __user_config = {} -- Fallback to an empty table to prevent Neovim from crashing
     end
-    local sample_config_file = io.open(options.cosmos_configs_root .. '/.cosmos-nvim.sample.lua', 'r')
-    local sample_config = sample_config_file:read('*a')
-    sample_config_file:close()
-    local user_config_file = io.open(options.user_config_path, 'w')
-    user_config_file:write(sample_config)
-    user_config_file:close()
-    __user_config = dofile(options.user_config_path)
   end
+
+  -- Ensure __user_config is a table before deepcopying
+  if type(__user_config) ~= 'table' then
+    print(string.format("Warning: User config loaded into an unexpected type (%s), defaulting to empty table.", type(__user_config)))
+    __user_config = {}
+  end
+
   _user_config = vim.deepcopy(__user_config)
   if _user_config.layers == nil then
     _user_config.layers = {

@@ -67,6 +67,9 @@ cosmos.add_plugin('olimorris/codecompanion.nvim', {
 })
 
 cosmos.add_plugin('yetone/avante.nvim', {
+  event = 'VeryLazy', -- Moved from opts, standard lazy.nvim practice
+  version = false,    -- Moved from opts, standard lazy.nvim practice
+  build = 'make',       -- Moved from opts, standard lazy.nvim practice
   opts = {
     provider = 'gemini',
     gemini = {
@@ -75,26 +78,29 @@ cosmos.add_plugin('yetone/avante.nvim', {
       temperature = 0,
       max_tokens = 1048576,
     },
-    gemini_flash = {
-      model = 'gemini-2.5-flash-preview-04-17',
-      api_key_name = 'GEMINI_API_KEY',
-      temperature = 0,
-      max_tokens = 1048576,
-    },
     claude = {
-      model = 'claude-3-7-sonnet-latest',
+      model = 'claude-3-5-sonnet-latest',
       api_key_name = 'ANTHROPIC_API_KEY',
     },
     openai = {
-      model = 'o1-mini',
+      model = 'o4-mini',
       api_key_name = 'OPENAI_API_KEY', -- the shell command must prefixed with `^cmd:(.*)`
     },
-    build = 'make',
-    lazy = false,
-    version = false,
-    event = 'VeryLazy',
+    -- UI Customizations for the sidebar and internal windows
+    windows = {
+      width = 35, -- Example: Set sidebar width to 35%
+      edit = {
+        border = "rounded", -- Use rounded borders for the edit window
+        start_insert = true, -- This is a default, kept for clarity
+      },
+      ask = {
+        border = "rounded", -- Use rounded borders for the ask window
+        start_insert = true, -- This is a default, kept for clarity
+        floating = false, -- This is a default, kept for clarity
+      }
+      -- Other window defaults from avante.nvim/lua/avante/config.lua will apply
+    },
   },
-
   dependencies = {
     'nvim-treesitter/nvim-treesitter',
     'stevearc/dressing.nvim',
