@@ -102,15 +102,21 @@ function M.get_user_config()
           if load_ok then
             __user_config = loaded_config
           else
-            print(string.format("Error loading newly created sample config at %s: %s", options.user_config_path, loaded_config))
+            print(
+              string.format(
+                'Error loading newly created sample config at %s: %s',
+                options.user_config_path,
+                loaded_config
+              )
+            )
             __user_config = {} -- Fallback to an empty table
           end
         else
-          print(string.format("Error: Could not open user config file for writing at %s", options.user_config_path))
+          print(string.format('Error: Could not open user config file for writing at %s', options.user_config_path))
           __user_config = {} -- Fallback to an empty table
         end
       else
-        print(string.format("Error: Could not open sample config file at %s", sample_path))
+        print(string.format('Error: Could not open sample config file at %s', sample_path))
         __user_config = {} -- Fallback to an empty table
       end
     else
@@ -123,7 +129,12 @@ function M.get_user_config()
 
   -- Ensure __user_config is a table before deepcopying
   if type(__user_config) ~= 'table' then
-    print(string.format("Warning: User config loaded into an unexpected type (%s), defaulting to empty table.", type(__user_config)))
+    print(
+      string.format(
+        'Warning: User config loaded into an unexpected type (%s), defaulting to empty table.',
+        type(__user_config)
+      )
+    )
     __user_config = {}
   end
 

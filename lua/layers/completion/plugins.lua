@@ -68,8 +68,8 @@ cosmos.add_plugin('olimorris/codecompanion.nvim', {
 
 cosmos.add_plugin('yetone/avante.nvim', {
   event = 'VeryLazy', -- Moved from opts, standard lazy.nvim practice
-  version = false,    -- Moved from opts, standard lazy.nvim practice
-  build = 'make',       -- Moved from opts, standard lazy.nvim practice
+  version = false, -- Moved from opts, standard lazy.nvim practice
+  build = 'make', -- Moved from opts, standard lazy.nvim practice
   opts = {
     provider = 'gemini',
     gemini = {
@@ -90,14 +90,14 @@ cosmos.add_plugin('yetone/avante.nvim', {
     windows = {
       width = 35, -- Example: Set sidebar width to 35%
       edit = {
-        border = "rounded", -- Use rounded borders for the edit window
+        border = 'rounded', -- Use rounded borders for the edit window
         start_insert = true, -- This is a default, kept for clarity
       },
       ask = {
-        border = "rounded", -- Use rounded borders for the ask window
+        border = 'rounded', -- Use rounded borders for the ask window
         start_insert = true, -- This is a default, kept for clarity
         floating = false, -- This is a default, kept for clarity
-      }
+      },
       -- Other window defaults from avante.nvim/lua/avante/config.lua will apply
     },
   },

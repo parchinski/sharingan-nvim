@@ -20,7 +20,7 @@ local function fill_layer_options()
           ---@diagnostic disable-next-line: undefined-field
           utils.fill_options(options_module, layer.options)
         else
-          print(string.format("Error loading options from %s: %s", module_name, options_module))
+          print(string.format('Error loading options from %s: %s', module_name, options_module))
         end
       end
     end
@@ -36,7 +36,7 @@ local function execute_layer_settings()
       if utils.file_exists(f) then
         local ok, err = pcall(dofile, f)
         if not ok then
-          print(string.format("Error executing settings file %s: %s", f, err))
+          print(string.format('Error executing settings file %s: %s', f, err))
         end
       end
     end
@@ -97,7 +97,7 @@ local function load_layer_keymappings()
     current_layer_name = m.layer_name
     local ok, err = pcall(require, m.module_name)
     if not ok then
-      print(string.format("Error loading keymappings from %s for layer %s: %s", m.module_name, m.layer_name, err))
+      print(string.format('Error loading keymappings from %s for layer %s: %s', m.module_name, m.layer_name, err))
     end
     current_layer_name = nil
   end
@@ -108,7 +108,7 @@ local function load_layer_plugins()
     current_layer_name = m.layer_name
     local ok, err = pcall(require, m.module_name)
     if not ok then
-      print(string.format("Error loading plugins from %s for layer %s: %s", m.module_name, m.layer_name, err))
+      print(string.format('Error loading plugins from %s for layer %s: %s', m.module_name, m.layer_name, err))
     end
     current_layer_name = nil
   end
@@ -328,7 +328,7 @@ local function setup_plugins()
     end
   end
 
-  require('lazy').setup({plugins}, {lockfile = vim.fn.stdpath('data') .. '/lazy-lock.json',})
+  require('lazy').setup({ plugins }, { lockfile = vim.fn.stdpath('data') .. '/lazy-lock.json' })
 end
 
 local function setup()
