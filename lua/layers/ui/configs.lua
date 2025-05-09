@@ -166,26 +166,26 @@ function configs.dashboard()
       footer = { utils.get_quote() },
       center = {
         {
-          icon = '  ',
+          icon = '🗂️ ',
           desc = 'List Projects',
           action = 'Telescope projects',
           shortcut = 'SPC p p',
         },
         {
-          icon = '  ',
+          icon = '🕓 ',
           desc = 'Recent Files',
           -- action = 'Telescope old_files',
           action = "lua require('layers.editor.functions').find_current_directory_files()",
           shortcut = 'SPC f f',
         },
         {
-          icon = '  ',
+          icon = '🔍 ',
           desc = 'Find File',
           action = 'Telescope find_files',
           shortcut = 'SPC f f',
         },
         {
-          icon = '󰊄  ',
+          icon = '🔎 ',
           desc = 'Find Text',
           action = 'Telescope live_grep',
           shortcut = 'SPC /  ',
