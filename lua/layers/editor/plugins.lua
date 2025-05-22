@@ -297,6 +297,6 @@ cosmos.add_plugin('Bilal2453/luvit-meta', {
 })
 
 -- Python, Flask and Jinja development support
-cosmos.add_plugin('lepture/vim-jinja', {
-  ft = { 'jinja', 'html', 'html.jinja', 'htmljinja' },
-})
+--cosmos.add_plugin('lepture/vim-jinja', {
+--  ft = { 'jinja', 'html', 'html.jinja', 'htmljinja' },
+--})

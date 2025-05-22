@@ -71,7 +71,7 @@ cosmos.add_plugin('yetone/avante.nvim', {
   version = false, -- Moved from opts, standard lazy.nvim practice
   build = 'make', -- Moved from opts, standard lazy.nvim practice
   opts = {
-    provider = 'gemini',
+    provider = 'claude',
     gemini = {
       model = 'gemini-2.5-pro-preview-05-06',
       api_key_name = 'GEMINI_API_KEY',
@@ -79,7 +79,7 @@ cosmos.add_plugin('yetone/avante.nvim', {
       max_tokens = 1048576,
     },
     claude = {
-      model = 'claude-3-5-sonnet-latest',
+      model = 'claude-sonnet-4-20250514',
       api_key_name = 'ANTHROPIC_API_KEY',
     },
     openai = {
