@@ -67,24 +67,50 @@ cosmos.add_plugin('olimorris/codecompanion.nvim', {
 })
 
 cosmos.add_plugin('yetone/avante.nvim', {
-  event = 'VeryLazy', -- Moved from opts, standard lazy.nvim practice
-  version = false, -- Moved from opts, standard lazy.nvim practice
-  build = 'make', -- Moved from opts, standard lazy.nvim practice
+  dev = local_avante_dir_exists,
+  dir = local_avante_dir_exists and local_avante_dir or nil,
+  event = 'VeryLazy',
+  build = 'make',
   opts = {
-    provider = 'claude',
-    gemini = {
-      model = 'gemini-2.5-pro-preview-05-06',
-      api_key_name = 'GEMINI_API_KEY',
-      temperature = 0,
-      max_tokens = 1048576,
+    debug = true,
+    mode = 'agentic',
+    web_search_engine = {
+      provider = 'serpapi',
     },
-    claude = {
-      model = 'claude-sonnet-4-20250514',
-      api_key_name = 'ANTHROPIC_API_KEY',
+    rag_service = {
+      enabled = false, -- Enables the rag service, requires OPENAI_API_KEY to be set
+      provider = 'ollama',
+      llm_model = 'llama3.2',
+      embed_model = 'nomic-embed-text',
+      endpoint = 'http://10.0.0.244:11434',
     },
-    openai = {
-      model = 'o4-mini',
-      api_key_name = 'OPENAI_API_KEY', -- the shell command must prefixed with `^cmd:(.*)`
+    -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
+    -- system_prompt = function()
+    --   local hub = require('mcphub').get_hub_instance()
+    --   return hub:get_active_servers_prompt()
+    -- end,
+    -- -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
+    -- custom_tools = function()
+    --   return {
+    --     require('mcphub.extensions.avante').mcp_tool(),
+    --   }
+    -- end,
+    provider = 'gemini',
+    -- provider = 'copilot_gemini',
+    -- provider = 'copilot_openai',
+    -- provider = 'copilot:gpt-4.1',
+    -- provider = 'openai-gpt-4o-mini',
+    selector = {
+      provider = 'telescope',
+    },
+    history = {
+      -- carried_entry_count = 3,
+    },
+    providers = {
+      gemini = {
+        model = 'gemini-2.5-pro-preview-05-06',
+        api_key_name = 'GEMINI_API_KEY',
+      },
     },
     -- UI Customizations for the sidebar and internal windows
     windows = {
