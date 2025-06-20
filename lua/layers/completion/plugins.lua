@@ -95,7 +95,7 @@ cosmos.add_plugin('yetone/avante.nvim', {
     --     require('mcphub.extensions.avante').mcp_tool(),
     --   }
     -- end,
-    provider = 'gemini',
+    provider = 'gemini_lite',
     -- provider = 'copilot_gemini',
     -- provider = 'copilot_openai',
     -- provider = 'copilot:gpt-4.1',
@@ -109,6 +109,10 @@ cosmos.add_plugin('yetone/avante.nvim', {
     providers = {
       gemini = {
         model = 'gemini-2.5-pro-preview-05-06',
+        api_key_name = 'GEMINI_API_KEY',
+      },
+      gemini_lite = {
+        model = 'gemini-2.0-flash-lite',
         api_key_name = 'GEMINI_API_KEY',
       },
     },
