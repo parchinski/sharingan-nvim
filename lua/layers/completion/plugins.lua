@@ -72,7 +72,7 @@ cosmos.add_plugin('yetone/avante.nvim', {
   event = 'VeryLazy',
   build = 'make',
   opts = {
-    debug = true,
+    debug = false,
     mode = 'agentic',
     web_search_engine = {
       provider = 'serpapi',
@@ -95,7 +95,7 @@ cosmos.add_plugin('yetone/avante.nvim', {
     --     require('mcphub.extensions.avante').mcp_tool(),
     --   }
     -- end,
-    provider = 'gemini_lite',
+    provider = 'gemini_fast',
     -- provider = 'copilot_gemini',
     -- provider = 'copilot_openai',
     -- provider = 'copilot:gpt-4.1',
@@ -112,8 +112,14 @@ cosmos.add_plugin('yetone/avante.nvim', {
         api_key_name = 'GEMINI_API_KEY',
       },
       gemini_lite = {
-        model = 'gemini-2.0-flash-lite',
+        model = 'gemini-2.5-flash-lite-preview-06-17',
         api_key_name = 'GEMINI_API_KEY',
+        __inherited_from = "gemini",
+      },
+      gemini_fast = {
+        model = 'gemini-2.5-flash',
+        api_key_name = 'GEMINI_API_KEY',
+        __inherited_from = "gemini",
       },
     },
     -- UI Customizations for the sidebar and internal windows
