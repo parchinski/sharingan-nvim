@@ -1,11 +1,6 @@
 local cosmos = require('core.cosmos')
 local configs = require('layers.completion.configs')
 
-cosmos.add_plugin('github/copilot.vim', {
-  dependencies = { 'hrsh7th/nvim-cmp' },
-  event = 'BufRead',
-})
-
 cosmos.add_plugin('hrsh7th/nvim-cmp', {
   dependencies = {
     {
@@ -39,32 +34,6 @@ cosmos.add_plugin('hrsh7th/cmp-cmdline', { dependencies = { 'hrsh7th/nvim-cmp' }
 cosmos.add_plugin('dmitmel/cmp-cmdline-history', { dependencies = { 'hrsh7th/nvim-cmp' }, event = 'BufRead' })
 
 cosmos.add_plugin('saadparwaiz1/cmp_luasnip', { dependencies = { 'hrsh7th/nvim-cmp' }, event = 'BufRead' })
-
-cosmos.add_plugin('jackMort/ChatGPT.nvim', {
-  event = 'VeryLazy',
-  config = configs.chatgpt,
-  dependencies = {
-    'MunifTanjim/nui.nvim',
-    'nvim-lua/plenary.nvim',
-    'folke/trouble.nvim',
-    'nvim-telescope/telescope.nvim',
-  },
-})
-
-cosmos.add_plugin('olimorris/codecompanion.nvim', {
-  dependencies = {
-    'nvim-lua/plenary.nvim',
-    'nvim-treesitter/nvim-treesitter',
-    'nvim-telescope/telescope.nvim', -- Optional
-    {
-      'stevearc/dressing.nvim', -- Optional: Improves the default Neovim UI
-      opts = {},
-    },
-  },
-  config = function()
-    require('codecompanion').setup()
-  end,
-})
 
 cosmos.add_plugin('yetone/avante.nvim', {
   dev = local_avante_dir_exists,
