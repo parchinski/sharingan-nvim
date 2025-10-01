@@ -10,10 +10,7 @@ return {
       enable_beacon = false,
       enable_smooth_scrolling = false,
     },
-    {
-      'completion',
-      tab_complete_copilot_first = false,
-    },
+    'completion',
   },
   options = {
     -- python3_host_prog = '~/.pyenv/versions/nvim-py3/bin/python',

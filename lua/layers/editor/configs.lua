@@ -230,7 +230,7 @@ function configs.mason()
 
   local servers = {
     ts_ls = {
-      root_dir = lspconfig.util.root_pattern('tsconfig.json', 'package.json', '.git'),
+      root_dir = util.root_pattern('tsconfig.json', 'package.json', '.git'),
     },
     biome = {
       root_dir = function(fname)
@@ -250,7 +250,6 @@ function configs.mason()
               vim.fn.expand('$VIMRUNTIME/lua'),
               vim.fn.expand('$VIMRUNTIME/lua/vim/lsp'),
               vim.fn.stdpath('data') .. '/lazy/lazy.nvim/lua/lazy',
-              -- vim.fn.expand('$HOME/workspace/projects'), -- parent/avante.nvim
               '${3rd}/luv/library',
             },
           },

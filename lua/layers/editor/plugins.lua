@@ -285,7 +285,6 @@ cosmos.add_plugin('folke/lazydev.nvim', {
   },
   opts = {
     library = {
-      { path = '~/workspace/projects/avante.nvim/lua', words = { 'avante' } },
       { path = 'luvit-meta/library', words = { 'vim%.uv' } },
       { path = 'lazy.nvim', words = { 'Util' } },
     },
