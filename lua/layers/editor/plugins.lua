@@ -112,28 +112,17 @@ cosmos.add_plugin('lewis6991/spellsitter.nvim', {
 cosmos.add_plugin('williamboman/mason.nvim', {
   dependencies = {
     { 'williamboman/mason-lspconfig.nvim', lazy = true },
-    { 'neovim/nvim-lspconfig', lazy = true },
     { 'hrsh7th/cmp-nvim-lsp', lazy = true, dependencies = { 'hrsh7th/nvim-cmp' } },
-    -- { 'folke/neodev.nvim', lazy = true },
-    { 'nvimtools/none-ls.nvim', lazy = true, event = { 'BufReadPost', 'BufNewFile' } },
-    { 'jay-babu/mason-null-ls.nvim', lazy = true },
-    { 'simrat39/inlay-hints.nvim', lazy = true, config = configs.inlay_hints },
-    { 'simrat39/rust-tools.nvim', lazy = true },
   },
   config = configs.mason,
-})
-
-cosmos.add_plugin('mhartington/formatter.nvim', {
-  config = configs.formatter,
 })
 
 cosmos.add_plugin('ojroques/nvim-lspfuzzy', {
   config = configs.lspfuzzy,
   event = 'BufRead',
   dependencies = {
-    { 'neovim/nvim-lspconfig' },
     { 'junegunn/fzf', event = 'BufRead' },
-    { 'junegunn/fzf.vim', event = 'BufRead' }, -- to enable preview (optional)
+    { 'junegunn/fzf.vim', event = 'BufRead' },
   },
 })
 
