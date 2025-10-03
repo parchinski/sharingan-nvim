@@ -1,6 +1,26 @@
 local configs = {}
 
 function configs.mason()
+  -- Configure diagnostic settings first
+  vim.diagnostic.config({
+    virtual_text = {
+      prefix = '●',
+      spacing = 4,
+    },
+    signs = true,
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+    float = {
+      focusable = true,
+      style = 'minimal',
+      border = 'rounded',
+      source = 'always',
+      header = '',
+      prefix = '',
+    },
+  })
+
   require('mason').setup({
     ui = {
       keymaps = {
@@ -22,6 +42,7 @@ function configs.mason()
     ensure_installed = {
       'ruff', -- Python linting + formatting
       'eslint', -- JS/TS linting with Prettier integration
+      'ts_ls', -- TypeScript/JavaScript language server
     },
     automatic_setup = false, -- We'll manually configure via vim.lsp.config
   })
@@ -51,6 +72,7 @@ function configs.mason()
 
   -- Configure ESLint with Prettier integration for JS/TS
   vim.lsp.config('eslint', {
+    cmd = { 'vscode-eslint-language-server', '--stdio' },
     filetypes = {
       'javascript',
       'javascriptreact',
@@ -70,12 +92,145 @@ function configs.mason()
     },
     settings = {
       format = true,
+      packageManager = 'npm',
+      codeAction = {
+        disableRuleComment = {
+          enable = true,
+          location = 'separateLine',
+        },
+        showDocumentation = {
+          enable = true,
+        },
+      },
+      codeActionOnSave = {
+        enable = true,
+        mode = 'all',
+      },
       -- ESLint will use Prettier via eslint-config-prettier and eslint-plugin-prettier
     },
   })
 
+  -- Configure TypeScript Language Server
+  vim.lsp.config('ts_ls', {
+    cmd = { 'typescript-language-server', '--stdio' },
+    filetypes = {
+      'javascript',
+      'javascriptreact',
+      'typescript',
+      'typescriptreact',
+    },
+    root_markers = {
+      'tsconfig.json',
+      'jsconfig.json',
+      'package.json',
+      '.git',
+    },
+    settings = {
+      typescript = {
+        inlayHints = {
+          includeInlayEnumMemberValueHints = true,
+          includeInlayFunctionLikeReturnTypeHints = true,
+          includeInlayFunctionParameterTypeHints = true,
+          includeInlayParameterNameHints = 'all',
+          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+          includeInlayPropertyDeclarationTypeHints = true,
+          includeInlayVariableTypeHints = true,
+        },
+      },
+      javascript = {
+        inlayHints = {
+          includeInlayEnumMemberValueHints = true,
+          includeInlayFunctionLikeReturnTypeHints = true,
+          includeInlayFunctionParameterTypeHints = true,
+          includeInlayParameterNameHints = 'all',
+          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+          includeInlayPropertyDeclarationTypeHints = true,
+          includeInlayVariableTypeHints = true,
+        },
+      },
+    },
+  })
+
   -- Enable configured servers
-  vim.lsp.enable({ 'ruff', 'eslint' })
+  vim.lsp.enable({ 'ruff', 'eslint', 'ts_ls' })
+
+  -- Manual LSP startup using FileType autocmd (more reliable than vim.lsp.enable)
+  vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'python' },
+    callback = function(args)
+      local bufnr = args.buf
+      if vim.bo[bufnr].filetype == 'python' then
+        -- Start Ruff LSP manually for Python files
+        vim.lsp.start({
+          name = 'ruff',
+          cmd = { 'ruff', 'server', '--preview' },
+          filetypes = { 'python' },
+          root_dir = vim.fn.getcwd(),
+          capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
+        })
+      end
+    end,
+  })
+
+  vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+    callback = function(args)
+      local bufnr = args.buf
+      local ft = vim.bo[bufnr].filetype
+      if ft == 'javascript' or ft == 'javascriptreact' or ft == 'typescript' or ft == 'typescriptreact' then
+        -- Start ESLint LSP manually for JS/TS files
+        vim.lsp.start({
+          name = 'eslint',
+          cmd = { 'vscode-eslint-language-server', '--stdio' },
+          filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte' },
+          root_dir = vim.fn.getcwd(),
+          capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
+          settings = {
+            format = true,
+            packageManager = 'npm',
+            codeAction = {
+              disableRuleComment = { enable = true, location = 'separateLine' },
+              showDocumentation = { enable = true },
+            },
+            codeActionOnSave = { enable = true, mode = 'all' },
+          },
+        })
+
+        -- Start TypeScript LSP manually for JS/TS files
+        vim.lsp.start({
+          name = 'ts_ls',
+          cmd = { 'typescript-language-server', '--stdio' },
+          filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+          root_dir = vim.fn.getcwd(),
+          capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
+          settings = {
+            typescript = {
+              inlayHints = {
+                includeInlayEnumMemberValueHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayParameterNameHints = 'all',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayVariableTypeHints = true,
+              },
+            },
+            javascript = {
+              inlayHints = {
+                includeInlayEnumMemberValueHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayParameterNameHints = 'all',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayVariableTypeHints = true,
+              },
+            },
+          },
+        })
+      end
+    end,
+  })
 
   -- Setup LspAttach autocmd for buffer-local settings and auto-formatting
   vim.api.nvim_create_autocmd('LspAttach', {
@@ -86,6 +241,38 @@ function configs.mason()
 
       -- Enable completion triggered by <c-x><c-o>
       vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+      -- Enable inlay hints if supported
+      if client.supports_method('textDocument/inlayHint') then
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+      end
+
+      -- LSP key mappings
+      local opts = { buffer = bufnr, noremap = true, silent = true }
+
+      -- Navigation
+      vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+      vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+      vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+      vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+
+      -- Code actions
+      vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+      vim.keymap.set('v', '<leader>ca', vim.lsp.buf.code_action, opts)
+
+      -- Diagnostics
+      vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+      vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+      vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, opts)
+
+      -- Formatting
+      vim.keymap.set('n', '<leader>f', function()
+        vim.lsp.buf.format({ async = true })
+      end, opts)
+
+      -- Rename
+      vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
 
       -- Auto-format on save for Python files using Ruff
       if client.name == 'ruff' and client.supports_method('textDocument/formatting') then
