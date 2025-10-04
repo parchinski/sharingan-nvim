@@ -41,7 +41,6 @@ function configs.mason()
   require('mason-lspconfig').setup({
     ensure_installed = {
       'ruff', -- Python linting + formatting
-      'eslint', -- JS/TS linting with Prettier integration
       'ts_ls', -- TypeScript/JavaScript language server
     },
     automatic_setup = false, -- We'll manually configure via vim.lsp.config
@@ -67,46 +66,6 @@ function configs.mason()
     root_markers = { 'pyproject.toml', 'setup.py', 'requirements.txt', '.git' },
     settings = {
       args = {},
-    },
-  })
-
-  -- Configure ESLint with Prettier integration for JS/TS
-  vim.lsp.config('eslint', {
-    cmd = { 'vscode-eslint-language-server', '--stdio' },
-    filetypes = {
-      'javascript',
-      'javascriptreact',
-      'typescript',
-      'typescriptreact',
-      'vue',
-      'svelte',
-    },
-    root_markers = {
-      '.eslintrc',
-      '.eslintrc.js',
-      '.eslintrc.json',
-      '.eslintrc.yml',
-      'eslint.config.js',
-      'package.json',
-      '.git',
-    },
-    settings = {
-      format = true,
-      packageManager = 'npm',
-      codeAction = {
-        disableRuleComment = {
-          enable = true,
-          location = 'separateLine',
-        },
-        showDocumentation = {
-          enable = true,
-        },
-      },
-      codeActionOnSave = {
-        enable = true,
-        mode = 'all',
-      },
-      -- ESLint will use Prettier via eslint-config-prettier and eslint-plugin-prettier
     },
   })
 
@@ -152,7 +111,7 @@ function configs.mason()
   })
 
   -- Enable configured servers
-  vim.lsp.enable({ 'ruff', 'eslint', 'ts_ls' })
+  vim.lsp.enable({ 'ruff', 'ts_ls' })
 
   -- Manual LSP startup using FileType autocmd (more reliable than vim.lsp.enable)
   vim.api.nvim_create_autocmd('FileType', {
@@ -178,24 +137,6 @@ function configs.mason()
       local bufnr = args.buf
       local ft = vim.bo[bufnr].filetype
       if ft == 'javascript' or ft == 'javascriptreact' or ft == 'typescript' or ft == 'typescriptreact' then
-        -- Start ESLint LSP manually for JS/TS files
-        vim.lsp.start({
-          name = 'eslint',
-          cmd = { 'vscode-eslint-language-server', '--stdio' },
-          filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte' },
-          root_dir = vim.fn.getcwd(),
-          capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
-          settings = {
-            format = true,
-            packageManager = 'npm',
-            codeAction = {
-              disableRuleComment = { enable = true, location = 'separateLine' },
-              showDocumentation = { enable = true },
-            },
-            codeActionOnSave = { enable = true, mode = 'all' },
-          },
-        })
-
         -- Start TypeScript LSP manually for JS/TS files
         vim.lsp.start({
           name = 'ts_ls',
@@ -298,21 +239,6 @@ function configs.mason()
             vim.lsp.buf.code_action({
               context = { only = { 'source.organizeImports' } },
               apply = true,
-            })
-          end,
-        })
-      end
-
-      -- Auto-fix/format on save for JS/TS files using ESLint
-      if client.name == 'eslint' and client.supports_method('textDocument/formatting') then
-        vim.api.nvim_create_autocmd('BufWritePre', {
-          buffer = bufnr,
-          group = vim.api.nvim_create_augroup('EslintFormat', { clear = false }),
-          callback = function()
-            vim.lsp.buf.format({
-              bufnr = bufnr,
-              id = client.id,
-              timeout_ms = 2000,
             })
           end,
         })
