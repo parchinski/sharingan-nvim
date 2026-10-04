@@ -1,1 +1,0 @@
-require('core.cosmos').startup()
